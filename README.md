@@ -33,7 +33,7 @@ b) The user is able to rate the app based on the predictions they receive and ho
 Provide a probability score of whether the input data sounds more like Michael Scott or Dwight Schrute
 
 * Data Ingestion & Understanding: *Preparing the data for future use and cleaning to input into model*
-	* Getting the data - All data available on Google drive
+	* Getting the data - All data available on [Google Drive](https://docs.google.com/spreadsheets/d/18wS5AAwOh8QO95RwHLS95POmSNKA2jjzdt0phrxeAE0/edit#gid=747974534)
 	* Uploading data to RDS
 	* Data cleaning - Includes stop word removal, lemmatization, punctuation removal and other text pre-processing
 	* Exploratory data analysis
