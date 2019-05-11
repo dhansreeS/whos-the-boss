@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from nltk.corpus import stopwords
+import os
 
 
 def load_data(path):
@@ -92,6 +93,8 @@ def process_data(path):
     lines_new['line_text'] = processed
 
     #    processed = get_lemmatized_text(processed)
+
+    os.makedirs(path + 'processed', exist_ok=True)
 
     lines_new.to_csv(path + "processed/processed_lines.csv", index=False)
 
