@@ -12,6 +12,7 @@ __pycache__/
 data/*
 !data/production/
 !data/sample/
+!data/raw/
 models/*
 !models/README.md
 extra/
