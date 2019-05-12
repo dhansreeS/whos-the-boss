@@ -5,7 +5,7 @@ so that all module imports can be absolute with respect to the main project dire
 
 Current commands enabled:
 
-TBD
+python3 run.py process --path=<name of path>
 """
 import argparse
 import logging.config
@@ -25,4 +25,4 @@ if __name__ == '__main__':
     sub_process.set_defaults(func=process_data)
 
     args = parser.parse_args()
-    args.func(args.path)
+    args.func(args)

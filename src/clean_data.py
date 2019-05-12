@@ -2,6 +2,9 @@ import pandas as pd
 import re
 from nltk.corpus import stopwords
 import os
+import argparse
+import logging.config
+logger = logging.getLogger(__name__)
 
 
 def load_data(path):
@@ -67,14 +70,14 @@ def remove_stop_words(df):
     return removed_stop_words
 
 
-def get_lemmatized_text(df):
-    """ Lemmatize words in corpus to generalize or normalize words for training """
+# def get_lemmatized_text(df):
+#     """ Lemmatize words in corpus to generalize or normalize words for training """
+#
+#     lemmatizer = WordNetLemmatizer()
+#     return [' '.join([lemmatizer.lemmatize(word) for word in d.split()]) for d in df]
 
-    lemmatizer = WordNetLemmatizer()
-    return [' '.join([lemmatizer.lemmatize(word) for word in d.split()]) for d in df]
 
-
-def process_data(path):
+def process_data(args):
     """
     Loads processed data to the path
 
@@ -82,6 +85,7 @@ def process_data(path):
     :return: NA
     """
     # read all lines from The Office
+    path = args.path
     all_lines = load_data(path + "raw/the_office_lines.csv")
 
     lines = extract_m_and_d(all_lines)
@@ -101,5 +105,13 @@ def process_data(path):
 
 if __name__ == '__main__':
 
-    path = "data/"
-    process_data(path)
+    parser = argparse.ArgumentParser(description="Process the data")
+    subparsers = parser.add_subparsers()
+
+    sub_process = subparsers.add_parser('process')
+    sub_process.add_argument("--path", type=str, default="./data/", help="Path for the data")
+    sub_process.set_defaults(func=process_data)
+
+    args = parser.parse_args()
+    args.func(args)
+
