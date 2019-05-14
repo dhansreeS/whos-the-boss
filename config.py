@@ -5,3 +5,4 @@ APP_NAME = "whos-the-boss"
 SQLALCHEMY_DATABASE_URI = 'sqlite:///../data/userlines.db'
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 HOST = "127.0.0.1"
+BUCKET_NAME = 'bucket-boss'
