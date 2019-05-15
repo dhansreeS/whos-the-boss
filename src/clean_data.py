@@ -8,12 +8,15 @@ logger = logging.getLogger(__name__)
 
 
 def load_data(path):
-    """
-    Load csv into datafram from specified path
+    """Load csv into dataframe from specified path
 
-    :param path (string): path to file
-    :return: pandas dataframe
+        Args:
+            path (string): Path from which data should be loaded.
+
+        Returns:
+            pandas dataframe of loaded data
     """
+
     # read all lines from The Office
     df = pd.read_csv(path)
 
@@ -21,11 +24,13 @@ def load_data(path):
 
 
 def extract_m_and_d(df):
-    """
-    Filter only Michael and Dwight's lines
+    """Filter only Michael and Dwight's lines
 
-    :param df (dataframe): all Office lines
-    :return: df with only Dwight and Mike's lines
+        Args:
+            df (dataframe): Dataframe with all office lines
+
+        Returns:
+            pandas dataframe of with only Michael and Dwight's lines
     """
 
     df = df.loc[(df['speaker'] == "Michael") | (df['speaker'] == "Dwight")]
@@ -34,11 +39,12 @@ def extract_m_and_d(df):
 
 
 def preprocess(df):
-    """
-    Removing spaces and other punctuations in the text. Lowercase all text
+    """Removing spaces and other punctuations in the text. Lowercase all text
 
-    :param df (dataframe): line text
-    :return: cleaned list
+        Args:
+            df (dataframe): Dataframe with Mike and Dwight's lines
+        Returns:
+            pandas dataframe with preprocessed text
     """
     # clean spaces, punctuation, replace with lowercase
     replace_no_space = re.compile("(\.)|(\;)|(\:)|(\!)|(\')|(\?)|(\,)|(\")|(\()|(\))|(\[)|(\])|(\d+)")
@@ -55,8 +61,11 @@ def preprocess(df):
 def remove_stop_words(df):
     """ Removing generic English stop words from text
 
-    :param df (dataframe): line text
-    :return: cleaned list
+        Args:
+            df (dataframe): Dataframe with lines
+        Returns:
+            pandas dataframe with no stop words in text
+
     """
 
     english_stop_words = stopwords.words('english')
@@ -78,11 +87,13 @@ def remove_stop_words(df):
 
 
 def process_data(args):
-    """
-    Loads processed data to the path
+    """Loads processed data to the path.
 
-    :param path (string): path to file
-    :return: NA
+        Args:
+            args (argument from user): Including string with path to load processed data to
+
+        Returns:
+            None
     """
     # read all lines from The Office
     path = args.path

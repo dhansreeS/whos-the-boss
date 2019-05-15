@@ -3,7 +3,7 @@ import argparse
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, MetaData
+from sqlalchemy import Column, Integer, String
 
 #For importing config variables
 import sys
@@ -33,9 +33,10 @@ class UserLines(Base):
 
 def create_sqlite_db(args):
     """Creates an sqlite database with the data models inherited from `Base` (UserLines).
+    URI can be passed as an argument or updated in the config file.
 
     Args:
-        args (argument from user): String defining SQLAlchemy connection URI in the form of
+        args (argument from user): String defining SQLAlchemy connection URI in the desired form
 
     Returns:
         None
@@ -47,9 +48,11 @@ def create_sqlite_db(args):
 
 def create_rds_db(args):
     """Creates an rds table? with the data models inherited from `Base` (UserLines).
+    Host, password, user and port are accessed from environment variables.
+    Database name can be passed as argument or updated in the config file.
 
         Args:
-            args (argument from user): String defining RDS in the desrired form
+            args (argument from user): Includes name of database in which table should be created
 
         Returns:
             None
@@ -60,8 +63,9 @@ def create_rds_db(args):
     password = os.environ.get("MYSQL_PASSWORD")
     host = os.environ.get("MYSQL_HOST")
     port = os.environ.get("MYSQL_PORT")
+    database = args.database
     engine_string = "{}://{}:{}@{}:{}/{}". \
-        format(conn_type, user, password, host, port, DATABASE_NAME)
+        format(conn_type, user, password, host, port, database)
 
     engine = sqlalchemy.create_engine(engine_string)
     Base.metadata.create_all(engine)
@@ -73,7 +77,7 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers()
 
     sub_process = subparsers.add_parser('createSqlite')
-    sub_process.add_argument("--database", type=str, default=SQLALCHEMY_DATABASE_URI,
+    sub_process.add_argument("--engine_string", type=str, default=SQLALCHEMY_DATABASE_URI,
                              help="Connection uri for SQLALCHEMY")
     sub_process.set_defaults(func=create_sqlite_db)
 
