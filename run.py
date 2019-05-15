@@ -7,6 +7,8 @@ Current commands enabled:
 
 python3 run.py process --path=<name of path>
 python3 run.py loadS3 --bucket=<name of bucket>
+python3 run.py createSqlite --engine_string=<engine_string for connection>
+python3 run.py createRDS --database=<Database in RDS>
 
 """
 import argparse
