@@ -49,5 +49,3 @@ def format_sql(sql, replace_sqlvar=None, replace_var=None, python=True):
         sql = sql.replace("%", "%%")
 
     return sql
-
-
