@@ -25,6 +25,7 @@ test/test/*
 # ipython notebooks
 *.ipynb
 .ipynb_checkpoints/
+!EDA.ipynb
 
 # C extensions
 *.so
