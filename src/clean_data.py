@@ -3,22 +3,35 @@ import re
 from nltk.corpus import stopwords
 import os
 import argparse
+import boto3
+import io
 import logging.config
 logger = logging.getLogger(__name__)
 
 
-def load_data(path):
+def load_data(path, s3=False, bucket=None):
     """Load csv into dataframe from specified path
 
         Args:
             path (string): Path from which data should be loaded.
+            s3 (boolean): Load from S3 or not
+            bucket (string): Name of bucket to be loaded from
 
         Returns:
             pandas dataframe of loaded data
     """
 
-    # read all lines from The Office
-    df = pd.read_csv(path)
+    if s3:
+
+        s3 = boto3.client('s3')
+        obj = s3.get_object(Bucket=bucket, Key='the-office-lines.csv')
+        df = pd.read_csv(io.BytesIO(obj['Body'].read()))
+
+    else:
+        # read all lines from The Office
+        df = pd.read_csv(path)
+
+    logger.info("File read into df")
 
     return df
 
@@ -34,6 +47,8 @@ def extract_m_and_d(df):
     """
 
     df = df.loc[(df['speaker'] == "Michael") | (df['speaker'] == "Dwight")]
+
+    logger.info("Df reduced to only Mike and Dwight lines")
 
     return df
 
@@ -97,7 +112,7 @@ def process_data(args):
     """
     # read all lines from The Office
     path = args.path
-    all_lines = load_data(path + "raw/the_office_lines.csv")
+    all_lines = load_data(path + "raw/the_office_lines.csv", args.s3, args.bucket_name)
 
     lines = extract_m_and_d(all_lines)
 
@@ -109,9 +124,20 @@ def process_data(args):
 
     #    processed = get_lemmatized_text(processed)
 
-    os.makedirs(path + 'processed', exist_ok=True)
+    logger.info("Dataframe cleaned")
 
-    lines_new.to_csv(path + "processed/processed_lines.csv", index=False)
+    if args.s3:
+        csv_buffer = io.StringIO()
+        lines_new.to_csv(csv_buffer)
+        s3_resource = boto3.resource('s3')
+        s3_resource.Object(args.bucket_name, 'processed_lines.csv').put(Body=csv_buffer.getvalue())
+
+    else:
+        os.makedirs(path + 'processed', exist_ok=True)
+
+        lines_new.to_csv(path + "processed/processed_lines.csv", index=False)
+
+    logger.info("Dataframe uploaded to desired path")
 
 
 if __name__ == '__main__':
@@ -121,6 +147,9 @@ if __name__ == '__main__':
 
     sub_process = subparsers.add_parser('process')
     sub_process.add_argument("--path", type=str, default="./data/", help="Path for the data")
+    sub_process.add_argument("--s3", default=False, help="Load from s3 or not")
+    sub_process.add_argument("--bucket_name", type=str, default=None, help="Bucket to be loaded from and into")
+
     sub_process.set_defaults(func=process_data)
 
     args = parser.parse_args()

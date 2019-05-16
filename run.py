@@ -5,7 +5,7 @@ so that all module imports can be absolute with respect to the main project dire
 
 Current commands enabled:
 
-python3 run.py process --path=<name of path>
+python3 run.py process --path=<name of path> --s3=<True or False> --bucket_name=<Name of bucket>
 python3 run.py loadS3 --bucket=<name of bucket>
 python3 run.py createSqlite --engine_string=<engine_string for connection>
 python3 run.py createRDS --database=<Database in RDS>
@@ -29,6 +29,8 @@ if __name__ == '__main__':
 
     sub_process = subparsers.add_parser('process')
     sub_process.add_argument("--path", type=str, default="./data/", help="Path for the data")
+    sub_process.add_argument("--s3", default=False, help="Load from s3 or not")
+    sub_process.add_argument("--bucket_name", type=str, default=BUCKET_NAME, help="Bucket to be loaded from and into")
     sub_process.set_defaults(func=process_data)
 
     sub_process = subparsers.add_parser('loadS3')

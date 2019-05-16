@@ -45,6 +45,8 @@ def create_sqlite_db(args):
     engine = sqlalchemy.create_engine(args.engine_string)
     Base.metadata.create_all(engine)
 
+    logger.info("SQLite database created")
+
 
 def create_rds_db(args):
     """Creates an rds table? with the data models inherited from `Base` (UserLines).
@@ -69,6 +71,8 @@ def create_rds_db(args):
 
     engine = sqlalchemy.create_engine(engine_string)
     Base.metadata.create_all(engine)
+
+    logger.info("Table created in RDS database")
 
 
 if __name__ == '__main__':
