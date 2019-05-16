@@ -4,8 +4,11 @@
 
 - [Project Charter](#project-charter)
 - [Planning](#planning)
-- [Backlog](#backlog)
-- [Icebox](#icebox)
+- [Running the application](#running-the-application)
+  * [1. Set up environment](#1-set-up-environment)
+  * [2. Update configurations](#2-update-configurations)
+  * [3. Initialize the database](#3-initialize-the-database)
+  * [4. Run certain processes](#4-run-certain-processes)
 
 <!-- tocstop -->
 
@@ -15,7 +18,7 @@
 [Research at NYU](https://steinhardt.nyu.edu/appsych/opus/issues/2011/fall/effects) has shown that supervisor-employee relationship affects job performance. But before you build a relationship with your supervisor, it’s important to understand what type of a boss your supervisor is. Understanding their personality would help you better bond with your boss and develop an effective working relationship with them. The question, however, is who IS your boss? The “Who’s the boss?” app enables you to determine if your boss is a Michael Scott or a Dwight K. Schrute, characters from the award-winning American sitcom “The Office”. Depending on who your boss is more like, you can work towards developing a better relationship with them.
 
 **Mission**: 
-The app will be designed to take a user input in the form of “things that your boss says”. The model will generate a probability of how much the person is like Michael Scott vs Dwight Schrute. Additionally, it will also display a few charactertistics of both these individuals. 
+The app will be designed to take a user input in the form of “things that your boss says”. The model will generate a prediction of whether the person is a Michael Scott or a Dwight Schrute.
 
 **Success criteria**: 
 a) The model that will be generated will make predictions about whether the text is more strongly attributed towards Michael Scott or Dwight Schrute. The accuracy of said model can be determined as follows:
@@ -28,48 +31,102 @@ b) The user is able to rate the app based on the predictions they receive and ho
 
 ## Planning
  
-**Theme**:
-
-Provide a probability score of whether the input data sounds more like Michael Scott or Dwight Schrute
-
-* Data Ingestion & Understanding: *Preparing the data for future use and cleaning to input into model*
-	* Getting the data - All data available on [Google Drive](https://docs.google.com/spreadsheets/d/18wS5AAwOh8QO95RwHLS95POmSNKA2jjzdt0phrxeAE0/edit#gid=747974534)
+**Data**:
+* Data Ingestion: *Preparing the data for future use*
+	* Getting the data
 	* Uploading data to RDS
-	* Data cleaning - Includes stop word removal, lemmatization, punctuation removal and other text pre-processing
+* Data Understanding: *Updating data structure and cleaning to input into model*
+	* Data cleaning
 	* Exploratory data analysis
-	* Feature engineering - Using text processing techniques like tf-idf, bag of words to engineer features
-	
+	* Feature engineering
+
+**Model**:
 * Model Building: *Generating model and iterating to achieve ideal results*
 	* Generate inital models
-	* Evaluate model - Checking accuracy and reiterating as required
-	* Create model pkl - And saving it to S3 for future prediction
+	* Create model pkl
+	* Evaluate model
 
-* Application: *Deploying the model, creating a UI and validation*
+**Application**:
+* Deployment: *Preparing model for use*
 	* Build prediction pipeline
 	* Deploy on EC2 instance
+* Front-end: *Creating a UI*
 	* Build front-end 
 	* Add bells and whistles to beautify front-end
+* Validation: *Ensuring the pipleine doesn't break*
 	* Create test cases
 	* Evaluate user inputs
 	* Log user input and error
 
-## Backlog
+## Running the application
+### 1. Set up environment 
 
-1. Data Ingestion & Understanding. Getting the data (0) - PLANNED
-2. Data Ingestion & Understanding. Uploading data to RDS (1) - PLANNED
-3. Data Ingestion & Understanding. Data cleaning (2) - PLANNED
-4. Data Ingestion & Understanding Exploratory data analysis (4) - PLANNED
-5. Data Ingestion & Understanding. Feature engineering (8) - PLANNED
-6. Model Building. Generate initial models (8) 
-7. Model Building. Evaluate model (1)
-8. Model Building. Create model pkl (1)
-9. Application. Build prediction pipeline (4)
-10. Application. Deploy on EC2 instance (8)
-11. Application. Build front-end (4)
-12. Application. Create test cases (2)
-13. Application. Evaluate user inputs (2)
-14. Application. Log user input and errors (2)
+The `requirements.txt` file contains the packages required to run the model code. An environment can be set up using conda as follows:
 
-## Icebox
+```bash
+conda create -n boss python=3.7
+conda activate boss
+pip install -r requirements.txt
+```
 
-Application. Add bells and whistles to beautify front-end
+Once the environment is created, please activate the environment before running any scripts.
+
+```bash
+conda activate boss
+```
+
+### 2. Update configurations 
+
+Most configuration updates can be made in the `config.py` file. It includes the following configurations
+
+```python
+DEBUG = True
+LOGGING_CONFIG = "config/logging/local.conf"
+PORT = 9033
+APP_NAME = "whos-the-boss"
+SQLALCHEMY_DATABASE_URI = 'sqlite:///data/msia423.db'
+SQLALCHEMY_TRACK_MODIFICATIONS = True
+DATABASE_NAME = 'msia423'
+HOST = "127.0.0.1"
+BUCKET_NAME = 'bucket-boss'
+```
+Please update the database name, bucket name (S3 bucket to be copied to) and the SQLAlchemy URI. 
+
+If data needs to be pushed to RDS please create a .mysqlconfig files as follows:
+
+```bash
+export MYSQL_USER=<username>
+export MYSQL_PASSWORD=<password>
+export MYSQL_HOST=<RDS hostname>
+export MYSQL_PORT=<port>
+```
+After creating this file, please run the following to create the environment variables:
+`echo source vi ~/.mysqlconfig >> ~/.bash_profile`
+
+Please ensure you have run `aws configure` before trying to access any of the s3 buckets or RDS instance.
+
+### 3. Initialize the database
+
+You may initialize an sqlite database or create an table in an existing RDS database. 
+The table that is created is specifically to capture user inputs. 
+
+If you choose to use sqlite, run the following command:
+```python3 run.py createSqlite --engine_string=<engine_string for connection>```
+
+If you don't provide an engine_string, the default engine_string from the `config.py` file will be used.
+
+If you choose to create a table in an existing RDS database, run the following command: 
+```python3 run.py createRDS --database=<Database in RDS>```
+
+If you don't provide a database name, the default database name from the `config.py` file will be used.
+
+### 4. Run certain processes
+
+In addition to the database initialization, you can perform two only actions.
+
+Loading the data in your S3 bucket:
+```python3 run.py loadS3 --bucket=<name of bucket>```
+
+Pre-processing data and saving it to your local system or to an S3 bucket:
+```python3 run.py process --path=<name of path> --s3=<True or False> --bucket_name=<name of bucket>```
+
