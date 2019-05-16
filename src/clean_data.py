@@ -24,7 +24,7 @@ def load_data(path, s3=False, bucket=None):
     if s3:
 
         s3 = boto3.client('s3')
-        obj = s3.get_object(Bucket=bucket, Key='the-office-lines.csv')
+        obj = s3.get_object(Bucket=bucket, Key='the_office_lines.csv')
         df = pd.read_csv(io.BytesIO(obj['Body'].read()))
 
     else:
