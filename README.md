@@ -101,6 +101,7 @@ export MYSQL_HOST=<RDS hostname>
 export MYSQL_PORT=<port>
 ```
 After creating this file, please run the following to create the environment variables:
+
 `echo source vi ~/.mysqlconfig >> ~/.bash_profile`
 
 Please ensure you have run `aws configure` before trying to access any of the s3 buckets or RDS instance.
@@ -111,11 +112,13 @@ You may initialize an sqlite database or create an table in an existing RDS data
 The table that is created is specifically to capture user inputs. 
 
 If you choose to use sqlite, run the following command:
+
 ```python3 run.py createSqlite --engine_string=<engine_string for connection>```
 
 If you don't provide an engine_string, the default engine_string from the `config.py` file will be used.
 
 If you choose to create a table in an existing RDS database, run the following command: 
+
 ```python3 run.py createRDS --database=<Database in RDS>```
 
 If you don't provide a database name, the default database name from the `config.py` file will be used.
@@ -125,8 +128,10 @@ If you don't provide a database name, the default database name from the `config
 In addition to the database initialization, you can perform two only actions.
 
 Loading the data in your S3 bucket:
+
 ```python3 run.py loadS3 --bucket=<name of bucket>```
 
 Pre-processing data and saving it to your local system or to an S3 bucket:
+
 ```python3 run.py process --path=<name of path> --s3=<True or False> --bucket_name=<name of bucket>```
 
