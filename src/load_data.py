@@ -1,5 +1,10 @@
 import boto3
-import argparse
+import botocore
+import yaml
+import sys
+import config
+import logging.config
+logger = logging.getLogger(__name__)
 
 
 def load_to_s3(args):
@@ -13,23 +18,23 @@ def load_to_s3(args):
         None
     """
 
+    try:
+        with open(config.AWS_CONFIG, 'r') as f:
+            aws_config = yaml.load(f)
+    except FileNotFoundError:
+        logger.error('AWS config YAML File not Found')
+        sys.exit(1)
+
     s3 = boto3.resource('s3')
 
-    bucketname = args.bucket
+    bucketname = aws_config['DEST_S3_BUCKET']
     copy_source = {'Bucket': 'nw-dhansreesuraj-s3', 'Key': 'the_office_lines.csv'}
     bucket = s3.Bucket(bucketname)
-    bucket.copy(copy_source, 'the_office_lines.csv')
 
+    try:
+        bucket.copy(copy_source, 'the_office_lines.csv')
+        logger.info('File copied to s3 bucket %s', bucketname)
 
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(description="Data processes")
-    subparsers = parser.add_subparsers()
-
-    sub_process = subparsers.add_parser('loadS3')
-    sub_process.add_argument("--bucket", type=str, default=BUCKET_NAME, help="Bucket to be copied to")
-    sub_process.set_defaults(func=load_to_s3)
-
-    args = parser.parse_args()
-    args.func(args)
-
+    except botocore.exceptions.NoCredentialsError as e:
+        logger.error(e)
+        sys.exit(3)

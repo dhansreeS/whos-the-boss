@@ -1,16 +1,12 @@
 import logging.config
-import argparse
-
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
-
-#For importing config variables
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join('..')))
+import yaml
+import config
+import sys
 
-from config import SQLALCHEMY_DATABASE_URI, DATABASE_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -42,54 +38,58 @@ def create_sqlite_db(args):
         None
     """
 
-    engine = sqlalchemy.create_engine(args.engine_string)
-    Base.metadata.create_all(engine)
+    try:
+        engine = sqlalchemy.create_engine(args.engine_string)
+        logger.info('SQLite database created')
 
-    logger.info("SQLite database created")
+        Base.metadata.create_all(engine)
+        logger.info('Table created in SQLite database')
+
+    except Exception as e:
+        logger.error(e)
+        sys.exit(5)
 
 
 def create_rds_db(args):
-    """Creates an rds table? with the data models inherited from `Base` (UserLines).
+    """Creates an rds table with the data models inherited from `Base` (UserLines).
     Host, password, user and port are accessed from environment variables.
     Database name can be passed as argument or updated in the config file.
 
         Args:
-            args (argument from user): Includes name of database in which table should be created
+            args (argument from user): Includes username and password
 
         Returns:
             None
     """
 
-    conn_type = "mysql+pymysql"
-    user = os.environ.get("MYSQL_USER")
-    password = os.environ.get("MYSQL_PASSWORD")
-    host = os.environ.get("MYSQL_HOST")
-    port = os.environ.get("MYSQL_PORT")
-    database = args.database
-    engine_string = "{}://{}:{}@{}:{}/{}". \
+    try:
+        with open(config.AWS_CONFIG, 'r') as f:
+            aws_config = yaml.load(f)
+    except FileNotFoundError:
+        logger.error('AWS config YAML File not Found')
+        sys.exit(1)
+
+    conn_type = aws_config['CONN_TYPE']
+    host = aws_config['HOST_NAME']
+    port = aws_config['PORT_NO']
+    database = aws_config['DATABASE_NAME']
+
+    if args.username is None:
+        user = os.environ.get('MYSQL_USER')
+        password = os.environ.get('MYSQL_PASSWORD')
+    else:
+        user = args.username
+        password = args.password
+
+    engine_string = '{}://{}:{}@{}:{}/{}'. \
         format(conn_type, user, password, host, port, database)
 
-    engine = sqlalchemy.create_engine(engine_string)
-    Base.metadata.create_all(engine)
+    try:
+        engine = sqlalchemy.create_engine(engine_string)
+        Base.metadata.create_all(engine)
 
-    logger.info("Table created in RDS database")
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(description="Data processes")
-    subparsers = parser.add_subparsers()
-
-    sub_process = subparsers.add_parser('createSqlite')
-    sub_process.add_argument("--engine_string", type=str, default=SQLALCHEMY_DATABASE_URI,
-                             help="Connection uri for SQLALCHEMY")
-    sub_process.set_defaults(func=create_sqlite_db)
-
-    sub_process = subparsers.add_parser('createRDS')
-    sub_process.add_argument("--database", type=str, default=DATABASE_NAME,
-                             help="Database in RDS")
-    sub_process.set_defaults(func=create_rds_db)
-
-    args = parser.parse_args()
-    args.func(args)
+        logger.info('Table created in RDS database')
+    except Exception as e:
+        logger.error(e)
+        sys.exit(3)
 
