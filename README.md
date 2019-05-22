@@ -81,16 +81,24 @@ Most configuration updates can be made in the `config.py` file. It includes the 
 
 ```python
 DEBUG = True
-LOGGING_CONFIG = "config/logging/local.conf"
+LOGGING_CONFIG = path.join(PROJECT_HOME, 'config/logging/local.conf')
+
+HOST = '127.0.0.1'
 PORT = 9033
-APP_NAME = "whos-the-boss"
-SQLALCHEMY_DATABASE_URI = 'sqlite:///data/msia423.db'
+APP_NAME = 'whos-the-boss'
+
+# database configurations
+DATABASE_NAME = 'msia423'   # also update config_aws.yml
+DB_PATH = path.join(PROJECT_HOME, 'data/'+DATABASE_NAME+'.db')
+SQLALCHEMY_DATABASE_URI = 'sqlite:////{}'.format(DB_PATH)
 SQLALCHEMY_TRACK_MODIFICATIONS = True
-DATABASE_NAME = 'msia423'
-HOST = "127.0.0.1"
-BUCKET_NAME = 'bucket-boss'
+
+# aws configurations
+AWS_CONFIG = path.join(PROJECT_HOME, 'config/config_aws.yml')
 ```
-Please update the database name, bucket name (S3 bucket to be copied to) and the SQLAlchemy URI. 
+Please update the database name and the SQLAlchemy URI. 
+
+For all AWS configurations, including the S3 bucket and RDS, please update the `config_aws.yml` file. 
 
 If data needs to be pushed to RDS please create a .mysqlconfig files as follows:
 
@@ -104,6 +112,8 @@ After creating this file, please run the following to create the environment var
 
 `echo source vi ~/.mysqlconfig >> ~/.bash_profile`
 
+If setting an environment variable is not possible, you can update the `config_aws.yml` file and then enter your user name and password through the command line.
+
 Please ensure you have run `aws configure` before trying to access any of the s3 buckets or RDS instance.
 
 ### 3. Initialize the database
@@ -113,27 +123,29 @@ The table that is created is specifically to capture user inputs.
 
 If you choose to use sqlite, run the following command:
 
-```python3 run.py createSqlite --engine_string=<engine_string for connection>```
+```python3 run.py createSqlite```
 
-If you don't provide an engine_string, the default engine_string from the `config.py` file will be used.
+The SQL Alchemy URI engine_string from the `config.py` file will be used.
 
 If you choose to create a table in an existing RDS database, run the following command: 
 
-```python3 run.py createRDS --database=<Database in RDS>```
+```python3 run.py createRDS --username=<Username for RDS> --password=<Password for RDS```
 
-If you don't provide a database name, the default database name from the `config.py` file will be used.
+The database name from the `config_aws.yml` file will be used.
 
 ### 4. Run certain processes
 
-In addition to the database initialization, you can perform two only actions.
+In addition to the database initialization, you can perform two actions.
 
 Loading the data in your S3 bucket:
 
-```python3 run.py loadS3 --bucket=<name of bucket>```
+```python3 run.py loadS3```
+
+The bucket name will be taken from the `config_aws.yml` file. 
 
 Pre-processing data and saving it to your local system or to an S3 bucket:
 
-```python3 run.py process --path=<name of path> --s3=<True or False> --bucket_name=<name of bucket>```
+```python3 run.py process --path=<name of path> --s3=<True or False>```
 
 
 ## Collaborators
