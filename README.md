@@ -135,6 +135,8 @@ Pre-processing data and saving it to your local system or to an S3 bucket:
 
 ```python3 run.py process --path=<name of path> --s3=<True or False> --bucket_name=<name of bucket>```
 
+
 ## Collaborators
 
 QA partner - [Arpan Venugopal](https://github.com/spartan07)
+
