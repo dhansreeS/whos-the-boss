@@ -1,0 +1,5 @@
+DEST_S3_BUCKET: bucket-boss
+HOST_NAME: mysql-nw-dhansreesuraj.cfjz8jklwgcf.us-east-2.rds.amazonaws.com
+PORT_NO: 3306
+DATABASE_NAME: msia423
+CONN_TYPE: mysql+pymysql
