@@ -24,4 +24,11 @@
         </fieldset>
     </form>
     <br>
+    <div class="result" align="center">
+    {% if result %}
+        <b>Statement</b> : {{ original_input }}
+        <br>
+        <br> Your boss is a <p style="font-size:50px">{{ result }}</p>
+    {% endif %}
+</div>
 </html>

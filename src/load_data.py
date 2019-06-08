@@ -1,4 +1,5 @@
 import boto3
+import os
 import botocore
 import yaml
 import sys
@@ -27,14 +28,28 @@ def load_to_s3(args):
 
     s3 = boto3.resource('s3')
 
-    bucketname = aws_config['DEST_S3_BUCKET']
     copy_source = {'Bucket': 'nw-dhansreesuraj-s3', 'Key': 'the_office_lines.csv'}
-    bucket = s3.Bucket(bucketname)
 
-    try:
-        bucket.copy(copy_source, 'the_office_lines.csv')
-        logger.info('File copied to s3 bucket %s', bucketname)
+    if args.s3:
+        bucketname = aws_config['DEST_S3_BUCKET']
+        bucket = s3.Bucket(bucketname)
 
-    except botocore.exceptions.NoCredentialsError as e:
-        logger.error(e)
-        sys.exit(3)
+        try:
+            bucket.copy(copy_source, 'raw/the_office_lines.csv')
+            logger.info('File copied to s3 bucket %s', bucketname)
+
+        except botocore.exceptions.NoCredentialsError as e:
+            logger.error(e)
+            sys.exit(3)
+
+    else:
+        source_bucket = s3.Bucket('nw-dhansreesuraj-s3')
+        try:
+            path = args.path
+            os.makedirs(path + 'raw', exist_ok=True)
+
+            source_bucket.download_file('the_office_lines.csv', path + 'raw/the_office_lines.csv')
+
+        except botocore.exceptions.NoCredentialsError as e:
+            logger.error(e)
+            sys.exit(3)

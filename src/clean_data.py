@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 import os
 import boto3
 import io
@@ -26,7 +27,7 @@ def load_data(path, s3=False, bucket=None):
     if s3:
 
         s3 = boto3.client('s3')
-        obj = s3.get_object(Bucket=bucket, Key='the_office_lines.csv')
+        obj = s3.get_object(Bucket=bucket, Key='raw/the_office_lines.csv')
         df = pd.read_csv(io.BytesIO(obj['Body'].read()))
 
     else:
@@ -96,11 +97,11 @@ def remove_stop_words(df):
     return removed_stop_words
 
 
-# def get_lemmatized_text(df):
-#     """ Lemmatize words in corpus to generalize or normalize words for training """
-#
-#     lemmatizer = WordNetLemmatizer()
-#     return [' '.join([lemmatizer.lemmatize(word) for word in d.split()]) for d in df]
+def get_lemmatized_text(df):
+    """ Lemmatize words in corpus to generalize or normalize words for training """
+
+    lemmatizer = WordNetLemmatizer()
+    return [' '.join([lemmatizer.lemmatize(word) for word in d.split()]) for d in df]
 
 
 def process_data(args):
@@ -129,11 +130,11 @@ def process_data(args):
 
     processed = preprocess(lines['line_text'])
     processed = remove_stop_words(processed)
+    processed = get_lemmatized_text(processed)
 
     lines_new = lines.copy()
     lines_new['line_text'] = processed
-
-    #    processed = get_lemmatized_text(processed)
+    lines_new = lines_new.dropna()
 
     logger.info('Dataframe cleaned')
 
@@ -141,7 +142,7 @@ def process_data(args):
         csv_buffer = io.StringIO()
         lines_new.to_csv(csv_buffer)
         s3_resource = boto3.resource('s3')
-        s3_resource.Object(bucket, 'processed_lines.csv').put(Body=csv_buffer.getvalue())
+        s3_resource.Object(bucket, 'processed/processed_lines.csv').put(Body=csv_buffer.getvalue())
 
     else:
         os.makedirs(path + 'processed', exist_ok=True)

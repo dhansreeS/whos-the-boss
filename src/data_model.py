@@ -42,6 +42,8 @@ def create_sqlite_db(args):
         engine = sqlalchemy.create_engine(args.engine_string)
         logger.info('SQLite database created')
 
+        print(args.engine_string)
+
         Base.metadata.create_all(engine)
         logger.info('Table created in SQLite database')
 

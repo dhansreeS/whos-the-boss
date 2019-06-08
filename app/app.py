@@ -1,8 +1,15 @@
 from flask import render_template, request, redirect, url_for, Flask
 import logging.config
-from src.clean_data import preprocess, remove_stop_words, get_lemmatized_text
 import pandas as pd
 import pickle
+from os import path
+import sys
+
+rel_path = path.dirname(path.dirname(path.abspath(__file__)))
+sys.path.append(rel_path)
+
+from src.clean_data import preprocess, remove_stop_words, get_lemmatized_text
+
 #from app import db, app
 #from app.models import Track
 
@@ -79,12 +86,17 @@ def main():
     if request.method == 'GET':
         return render_template('main.html')
     if request.method == 'POST':
-        statement = request.form['statement']
+        statement = str(request.form['statement'])
 
         processed = process_data(statement)
         processed = tfidf_vector(processed, path='../models/tfidf_vectorizer.pkl')
 
         prediction = predict_class(processed, path='../models/model.pkl')
+
+        if prediction == 0:
+            prediction = "Dwight"
+        else:
+            prediction = "Michael"
 
         return render_template('main.html', original_input=statement, result=prediction, )
 

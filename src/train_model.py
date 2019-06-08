@@ -62,7 +62,7 @@ def tfidf_vector(lines_text, path, s3=False, bucket=None):
     X1 = tfidf_vectorizer.transform(lines_text)
 
     if s3:
-        key = 'pickles/tfidf.pkl'
+        key = 'models/tfidf.pkl'
         pickle_byte_obj = pickle.dumps(tfidf_vectorizer)
         s3_resource = boto3.resource('s3')
         s3_resource.Object(bucket, key).put(Body=pickle_byte_obj)
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
     lines = lines.dropna()
 
-    X1 = tfidf_vector(lines['line_text'], path='../data/pickles')
+    X1 = tfidf_vector(lines['line_text'], path='../models')
     response = extract_response(lines)
     training_model(X1, response, C=0.8, path='../models')
 
