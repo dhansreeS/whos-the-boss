@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+    <style>
+        form {
+            margin: auto;
+            width: 35%;
+        }
+        .result {
+            margin: auto;
+            width: 35%;
+            border: 1px solid #ccc;
+        }
+</style>
+    <head>
+        <title>Who's the boss?</title>
+    </head>
+    <form action="{{ url_for('main') }}" method="POST">
+        <fieldset>
+            <legend>Enter the statement:</legend>
+            My boss says:
+            <input name="statement" type="text" required>
+            <br>
+            <input type="submit">
+        </fieldset>
+    </form>
+    <br>
+</html>
