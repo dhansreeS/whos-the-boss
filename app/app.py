@@ -8,6 +8,8 @@ import sys
 import datetime
 from flask_sqlalchemy import SQLAlchemy
 import yaml
+import boto3
+import io
 
 rel_path = path.dirname(path.dirname(path.abspath(__file__)))
 sys.path.append(rel_path)
@@ -33,8 +35,20 @@ except FileNotFoundError:
     sys.exit(1)
 
 # load models - tfidf
-vectorizer = pickle.load(open(app.config['TFIDF_PATH'], 'rb'))
-model = pickle.load(open(app.config['MODEL_PATH'], 'rb'))
+
+if app.config['USE_S3']:
+    s3 = boto3.resource('s3')
+    with io.BytesIO() as data:
+        s3.Bucket(app.config['DEST_S3_BUCKET']).download_fileobj(app.config['S3_TFIDF'], data)
+        data.seek(0)  # move back to the beginning after writing
+        vectorizer = pickle.load(data)
+    with io.BytesIO() as data2:
+        s3.Bucket(app.config['DEST_S3_BUCKET']).download_fileobj(app.config['S3_MODEL'], data2)
+        data2.seek(0)  # move back to the beginning after writing
+        model = pickle.load(data)
+else:
+    vectorizer = pickle.load(open(app.config['TFIDF_PATH'], 'rb'))
+    model = pickle.load(open(app.config['MODEL_PATH'], 'rb'))
 
 if app.config['USE_RDS']:
     aws_config = config['rds']

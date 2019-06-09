@@ -52,4 +52,10 @@ evaluate:
     CONFUSION_NAME: confusion.csv
     S3_METRIC_NAME: models/metrics.txt
     S3_CONFUSION_NAME: models/confusion.csv
+serve:
+  S3_MODEL: models/model.pkl
+  S3_TFIDF: models/tfidf_vectorizer.pkl
+  DEST_S3_BUCKET: bucket-boss
+  MODEL_PATH: ./models/model.pkl
+  TFIDF_PATH: ./models/tfidf_vectorizer.pkl
 
