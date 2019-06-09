@@ -1,34 +1,82 @@
 <!doctype html>
 <html>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300" rel="stylesheet">
+
     <style>
         form {
             margin: auto;
-            width: 35%;
+            width: 50%;
+        }
+        #titleDiv {
+            background-color: darkslategrey;
+            height: 100%;
+            width: 100%;
+            margin: auto;
+            text-align: center;
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+            color: whitesmoke;
+        }
+        .submit {
+            background: whitesmoke;
+            color: darkslategrey;
+            border-style: outset;
+            border-color: whitesmoke;
+            height: 30px;
+            width: 120px;
+            font-size: 12px;
+            font-family: 'Montserrat', sans-serif;
+            text-shadow: none;
         }
         .result {
+            background-color: whitesmoke;
+            text-align: center;
             margin: auto;
-            width: 35%;
+            width: 100%;
+            height: 500px;
             border: 1px solid #ccc;
+        }
+        p {
+            font-family: 'Montserrat', sans-serif;
+            color: #282828;
         }
 </style>
     <head>
         <title>Who's the boss?</title>
     </head>
-    <form action="{{ url_for('main') }}" method="POST">
-        <fieldset>
-            <legend>Enter the statement:</legend>
-            My boss says:
-            <input name="statement" type="text" required>
-            <br>
-            <input type="submit">
-        </fieldset>
-    </form>
+    <div id="titleDiv">
+        <h1>Who's the boss?</h1>
+        <form action="{{ url_for('main') }}" method="POST">
+            <fieldset>
+                <label for="comment">My boss says:</label>
+                <textarea class="form-control" rows="3" name="statement" required></textarea>
+                <br>
+                <input type="submit" class="submit">
+            </fieldset>
+        </form>
+    </div>
     <br>
     <div class="result" align="center">
+    <p>
+        <img src="https://media2.giphy.com/media/4LsN0YwgIsvaU/giphy.gif?cid=790b76115cfd71af58424c74599c8bfb&rid=giphy.gif"
+             alt="Michael Scott" style="float:left;margin:45px 20px 20px 0;width:333px;height:400px;">
+        <p style="float:left;margin:110px 0px 0px 0;width:200px;height:300px;">
+            Michael Scott is the "funny", eccentric regional manager of the Scranton branch of Dunder Mifflin. He loves his "that's what she said" jokes and making everyone feeling uncomfortable with his unusual comments. But he cares about all his employees and saying goodbye to him will be one of the hardest things you will have to do. </p>
+        <img src="https://media3.giphy.com/media/XS3AwCGCO3zvG/giphy.gif?cid=790b76115cfd738a6f3350696fd4dd55&rid=giphy.gif"
+             alt="Dwight Schrute" style="float:right;margin:45px 0px 0px 20px;width:333px;height:400px;">
+        <p style="float:right; margin:110px 0px 0px 0;width:200px;height:300px;">
+            Dwight Schrute starts out as assistant TO the regional manager but eventually becomes the regional manager. He loves beets, bears and Battlestar Galactica. If you want to survive in the wild, Dwight's the guy you will call. Despite his tough exterior, Dwight has moments where he's one of the kindest and most considerate people. </p>
+    </p>
     {% if result %}
-        <b>Statement</b> : {{ original_input }}
+        <br> <p style="font-size:30px">{{ original_input }}</p>
         <br>
-        <br> Your boss is a <p style="font-size:50px">{{ result }}</p>
+        <br> <p style="font-size: 20px"> Your boss is:  </p> <p style="font-size:40px">
+            {% for variable, value in result.items() %}
+             {{ value }} <b>{{ variable }}</b>
+            {% endfor %}
+        </p>
     {% endif %}
 </div>
 </html>

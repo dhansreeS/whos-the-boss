@@ -117,7 +117,13 @@ def main():
             logger.warning(e)
             sys.exit(5)
 
-        return render_template('main.html', original_input=statement, result=prediction, )
+        prob_pred = model.predict_proba(processed)
+
+        mike = "{0:.0f}%".format(prob_pred[0][1]*100)
+        dwight = "{0:.0f}%".format(prob_pred[0][0]*100)
+
+        return render_template('main.html', original_input=statement, result={'Michael':mike,
+                                                     'Dwight':dwight}, )
 
 
 def start_app(args):
