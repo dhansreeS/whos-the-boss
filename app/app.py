@@ -90,40 +90,43 @@ def process_data(new_line):
 @app.route('/', methods=['GET', 'POST'])
 def main():
     """Main view that shows the text box for input and displays the prediction results in a separate div"""
+    try:
+        if request.method == 'GET':
+            return render_template('main.html')
+        if request.method == 'POST':
+            time_db = datetime.datetime.now()
+            statement = str(request.form['statement'])
 
-    if request.method == 'GET':
-        return render_template('main.html')
-    if request.method == 'POST':
-        time_db = datetime.datetime.now()
-        statement = str(request.form['statement'])
+            processed = process_data(statement)
+            processed = vectorizer.transform(processed)
 
-        processed = process_data(statement)
-        processed = vectorizer.transform(processed)
+            prediction = model.predict(processed)
 
-        prediction = model.predict(processed)
+            if prediction == 0:
+                prediction = "Dwight"
+            else:
+                prediction = "Michael"
 
-        if prediction == 0:
-            prediction = "Dwight"
-        else:
-            prediction = "Michael"
+            try:
+                user_input = UserLines(user_text=statement, predicted=prediction, time=time_db)
+                db.session.add(user_input)
+                db.session.commit()
+                logger.info('New user input added')
 
-        try:
-            user_input = UserLines(user_text=statement, predicted=prediction, time=time_db)
-            db.session.add(user_input)
-            db.session.commit()
-            logger.info('New user input added')
+            except Exception as e:
+                logger.warning(e)
+                sys.exit(5)
 
-        except Exception as e:
-            logger.warning(e)
-            sys.exit(5)
+            prob_pred = model.predict_proba(processed)
 
-        prob_pred = model.predict_proba(processed)
+            mike = "{0:.0f}%".format(prob_pred[0][1]*100)
+            dwight = "{0:.0f}%".format(prob_pred[0][0]*100)
 
-        mike = "{0:.0f}%".format(prob_pred[0][1]*100)
-        dwight = "{0:.0f}%".format(prob_pred[0][0]*100)
+            return render_template('main.html', original_input=statement, result={'Michael':mike,
+                                                         'Dwight':dwight}, )
 
-        return render_template('main.html', original_input=statement, result={'Michael':mike,
-                                                     'Dwight':dwight}, )
+    except:
+        return render_template('error.html')
 
 
 def start_app(args):
