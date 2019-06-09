@@ -45,7 +45,7 @@ if app.config['USE_S3']:
     with io.BytesIO() as data2:
         s3.Bucket(app.config['DEST_S3_BUCKET']).download_fileobj(app.config['S3_MODEL'], data2)
         data2.seek(0)  # move back to the beginning after writing
-        model = pickle.load(data)
+        model = pickle.load(data2)
 else:
     vectorizer = pickle.load(open(app.config['TFIDF_PATH'], 'rb'))
     model = pickle.load(open(app.config['MODEL_PATH'], 'rb'))
