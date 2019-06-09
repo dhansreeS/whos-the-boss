@@ -9,4 +9,5 @@ APP_NAME = 'whos-the-boss'
 
 # all configurations
 CONFIG_FILE = path.join(PROJECT_HOME, 'config/config.yml')
+FLASK_CONFIG = path.join(PROJECT_HOME, 'config/flask_config.py')
 

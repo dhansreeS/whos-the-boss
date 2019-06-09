@@ -18,11 +18,12 @@ class UserLines(Base):
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
     user_text = Column(String(300), unique=False, nullable=False)
+    predicted = Column(String(30), unique=False, nullable=False)
     time = Column(DateTime, unique=False, nullable=False)
 
     def __repr__(self):
-        userlines_repr = "<UserLines(id='%i', user_text='%s', time='%s')>"
-        return userlines_repr % (self.id, self.user_text, self.time)
+        userlines_repr = "<UserLines(id='%i', user_text='%s', predicted='%s', time='%s')>"
+        return userlines_repr % (self.id, self.user_text, self.predicted, self.time)
 
 
 def create_sqlite_db(args):
@@ -76,8 +77,6 @@ def create_rds_db(args):
 
     engine_string = '{}://{}:{}@{}:{}/{}'. \
         format(conn_type, user, password, host, port, database)
-
-    print(engine_string)
 
     try:
         engine = sqlalchemy.create_engine(engine_string)

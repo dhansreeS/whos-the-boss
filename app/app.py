@@ -2,19 +2,21 @@ from flask import render_template, request, redirect, url_for, Flask
 import logging.config
 import pandas as pd
 import pickle
+import os
 from os import path
 import sys
+import datetime
+from flask_sqlalchemy import SQLAlchemy
+import yaml
 
 rel_path = path.dirname(path.dirname(path.abspath(__file__)))
 sys.path.append(rel_path)
 
 from src.clean_data import preprocess, remove_stop_words, get_lemmatized_text
-
-#from app import db, app
-#from app.models import Track
+from src.data_model import UserLines
+import config
 
 # Define LOGGING_CONFIG in config.py - path to config file for setting up the logger (e.g. config/logging/local.conf)
-logging.config.fileConfig('../config/logging/local.conf')
 logger = logging.getLogger("whos-the-boss")
 logger.debug('Test log')
 
@@ -22,6 +24,33 @@ app = Flask(__name__, template_folder='templates')
 
 # Configure flask app from flask_config.py
 app.config.from_pyfile('../config/flask_config.py')
+
+try:
+    with open(config.CONFIG_FILE, 'r') as f:
+        config = yaml.load(f)
+except FileNotFoundError:
+    logger.error('config YAML File not Found')
+    sys.exit(1)
+
+# load models - tfidf
+vectorizer = pickle.load(open(app.config['TFIDF_PATH'], 'rb'))
+model = pickle.load(open(app.config['MODEL_PATH'], 'rb'))
+
+if app.config['USE_RDS']:
+    aws_config = config['rds']
+
+    conn_type = aws_config['CONN_TYPE']
+    host = aws_config['HOST_NAME']
+    port = aws_config['PORT_NO']
+    database = aws_config['DATABASE_NAME']
+    user = os.environ.get('MYSQL_USER')
+    password = os.environ.get('MYSQL_PASSWORD')
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = '{}://{}:{}@{}:{}/{}'. \
+        format(conn_type, user, password, host, port, database)
+
+
+db = SQLAlchemy(app)
 
 
 def process_data(new_line):
@@ -44,104 +73,45 @@ def process_data(new_line):
     return processed
 
 
-def tfidf_vector(text, path, s3=False, bucket=None):
-    """Vectorize the line using tfidf_vectorizer
-
-            Args:
-                lines_text (list): processed line
-                path (string): Path from which the vectorizer should be loaded
-                s3 (boolean): Load from S3 or not
-                bucket (string): Name of bucket to be loaded from
-
-            Returns:
-                matrix with vectorized lines
-    """
-    vectorizer = pickle.load(open(path, 'rb'))
-    X = vectorizer.transform(text)
-
-    return X
-
-
-def predict_class(X, path, s3=False, bucket=None):
-    """Predict class for given text
-
-        Args:
-            X (matrix): vectorized line
-            path (string): Path from which the model should be loaded
-            s3 (boolean): Load from S3 or not
-            bucket (string): Name of bucket to be loaded from
-
-        Returns:
-            Prediction (string)
-    """
-    model = pickle.load(open(path, 'rb'))
-    prediction = model.predict(X)
-
-    return prediction
-
-
 @app.route('/', methods=['GET', 'POST'])
 def main():
+    """Main view that shows the text box for input and displays the prediction results in a separate div"""
 
     if request.method == 'GET':
         return render_template('main.html')
     if request.method == 'POST':
+        time_db = datetime.datetime.now()
         statement = str(request.form['statement'])
 
         processed = process_data(statement)
-        processed = tfidf_vector(processed, path='../models/tfidf_vectorizer.pkl')
+        processed = vectorizer.transform(processed)
 
-        prediction = predict_class(processed, path='../models/model.pkl')
+        prediction = model.predict(processed)
 
         if prediction == 0:
             prediction = "Dwight"
         else:
             prediction = "Michael"
 
+        try:
+            user_input = UserLines(user_text=statement, predicted=prediction, time=time_db)
+            db.session.add(user_input)
+            db.session.commit()
+            logger.info('New user input added')
+
+        except Exception as e:
+            logger.warning(e)
+            sys.exit(5)
+
         return render_template('main.html', original_input=statement, result=prediction, )
 
 
-if __name__ == '__main__':
+def start_app(args):
+    """Start application and choose to store user input in sqlite or rds
+        Args:
+            args: arguments including app specific configurations and specifications
+
+        Returns:
+            NA
+    """
     app.run(debug=app.config['DEBUG'], port=app.config['PORT'], host=app.config['HOST'])
-
-
-# @app.route('/')
-# def index():
-#     """Main view that lists songs in the database.
-#
-#     Create view into index page that uses data queried from Track database and
-#     inserts it into the msiapp/templates/index.html template.
-#
-#     Returns: rendered html template
-#
-#     """
-#
-#     try:
-#         tracks = Track.query.all()
-#         logger.debug("Index page accessed")
-#         return render_template('index.html', tracks=tracks)
-#     except:
-#         logger.warning("Not able to display tracks, error page returned")
-#         return render_template('error.html')
-#
-#
-# @app.route('/add', methods=['POST'])
-# def add_entry():
-#     """View that process a POST with new song input
-#
-#     :return: redirect to index page
-#     """
-#
-#     try:
-#         track1 = Track(artist=request.form['artist'], album=request.form['album'], title=request.form['title'])
-#         db.session.add(track1)
-#         db.session.commit()
-#         logger.info("New song added: %s by %s", request.form['title'], request.form['artist'])
-#         return redirect(url_for('index'))
-#     except:
-#         logger.warning("Not able to display tracks, error page returned")
-#         return render_template('error.html')
-#
-#
-# if __name__ == "__main__":
-#     app.run(debug=app.config["DEBUG"], port=app.config["PORT"], host=app.config["HOST"])
