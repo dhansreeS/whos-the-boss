@@ -1,10 +1,8 @@
 import logging.config
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 import os
-import yaml
-import config
 import sys
 
 
@@ -20,7 +18,7 @@ class UserLines(Base):
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
     user_text = Column(String(300), unique=False, nullable=False)
-    time = Column(String(100), unique=False, nullable=False)
+    time = Column(DateTime, unique=False, nullable=False)
 
     def __repr__(self):
         userlines_repr = "<UserLines(id='%i', user_text='%s', time='%s')>"
@@ -42,8 +40,6 @@ def create_sqlite_db(args):
         engine = sqlalchemy.create_engine(args.engine_string)
         logger.info('SQLite database created')
 
-        print(args.engine_string)
-
         Base.metadata.create_all(engine)
         logger.info('Table created in SQLite database')
 
@@ -64,12 +60,7 @@ def create_rds_db(args):
             None
     """
 
-    try:
-        with open(config.AWS_CONFIG, 'r') as f:
-            aws_config = yaml.load(f)
-    except FileNotFoundError:
-        logger.error('AWS config YAML File not Found')
-        sys.exit(1)
+    aws_config = args.rdsConfig
 
     conn_type = aws_config['CONN_TYPE']
     host = aws_config['HOST_NAME']
@@ -85,6 +76,8 @@ def create_rds_db(args):
 
     engine_string = '{}://{}:{}@{}:{}/{}'. \
         format(conn_type, user, password, host, port, database)
+
+    print(engine_string)
 
     try:
         engine = sqlalchemy.create_engine(engine_string)

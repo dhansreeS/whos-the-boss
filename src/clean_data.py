@@ -6,9 +6,6 @@ import os
 import boto3
 import io
 import logging.config
-import config
-import yaml
-import sys
 logger = logging.getLogger(__name__)
 
 
@@ -114,17 +111,11 @@ def process_data(args):
             None
     """
 
-    try:
-        with open(config.AWS_CONFIG, 'r') as f:
-            aws_config = yaml.load(f)
-    except FileNotFoundError:
-        logger.error('AWS config YAML File not Found')
-        sys.exit(1)
-
     # read all lines from The Office
-    path = args.path
-    bucket = aws_config['DEST_S3_BUCKET']
-    all_lines = load_data(path + 'raw/the_office_lines.csv', args.s3, bucket)
+    localConf = args.localConf
+    s3_config = args.s3config
+
+    all_lines = load_data(localConf['SOURCE_PATH'], args.s3, s3_config['DEST_S3_BUCKET'])
 
     lines = extract_m_and_d(all_lines)
 
@@ -142,12 +133,12 @@ def process_data(args):
         csv_buffer = io.StringIO()
         lines_new.to_csv(csv_buffer)
         s3_resource = boto3.resource('s3')
-        s3_resource.Object(bucket, 'processed/processed_lines.csv').put(Body=csv_buffer.getvalue())
+        s3_resource.Object(s3_config['DEST_S3_BUCKET'], localConf['FILE_NAME_S3']).put(Body=csv_buffer.getvalue())
 
     else:
-        os.makedirs(path + 'processed', exist_ok=True)
+        os.makedirs(localConf['DEST_PATH'], exist_ok=True)
 
-        lines_new.to_csv(path + 'processed/processed_lines.csv', index=False)
+        lines_new.to_csv(localConf['DEST_PATH'] + '/' + localConf['FILE_NAME'], index=False)
 
     logger.info('Dataframe uploaded to desired path')
 
