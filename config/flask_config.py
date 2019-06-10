@@ -9,7 +9,7 @@ APP_NAME = 'whos-the-boss'
 
 USE_S3 = True
 
-USE_RDS = False
+USE_RDS = True
 DB_PATH = path.join(PROJECT_HOME, 'data/msia423.db')
 SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(DB_PATH)
 SQLALCHEMY_TRACK_MODIFICATIONS = True
