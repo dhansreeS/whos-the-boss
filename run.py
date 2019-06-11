@@ -5,11 +5,12 @@ so that all module imports can be absolute with respect to the main project dire
 
 Current commands enabled:
 
-python3 run.py process --path=<name of path> --s3=<True or False>
-python3 run.py load
-python3 run.py createSqlite
-python3 run.py createRDS --username=<Username for RDS> --password=<Password for RDS>
-
+python3 run.py load --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>
+python3 run.py process --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>
+python3 run.py createSqlite --engine_string=<Database URI for sqlite db>
+python3 run.py createRDS --rdsConfig=<RDS configurations> --username=<Username for RDS> --password=<Password for RDS>
+python3 run.py train --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>
+python3 run.py evaluate --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>
 """
 import argparse
 import logging.config

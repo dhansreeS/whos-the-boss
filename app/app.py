@@ -122,10 +122,14 @@ def main():
             mike = "{0:.0f}%".format(prob_pred[0][1]*100)
             dwight = "{0:.0f}%".format(prob_pred[0][0]*100)
 
+            logger.info('Prediction made and updated.')
+
             return render_template('main.html', original_input=statement, result={'Michael':mike,
                                                          'Dwight':dwight}, )
 
     except:
+        logger.warning('Error raised while rendering template.')
+
         return render_template('error.html')
 
 

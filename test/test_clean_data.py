@@ -1,5 +1,8 @@
 import pandas as pd
-import numpy as np
+from os import path
+import sys
+rel_path = path.dirname(path.dirname(path.abspath(__file__)))
+sys.path.append(rel_path)
 import src.clean_data as cd
 
 
