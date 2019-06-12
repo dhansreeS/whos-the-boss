@@ -1,6 +1,6 @@
 from os import path
 from config import PROJECT_HOME
-DEBUG = True
+DEBUG = False
 LOGGING_CONFIG = "config/logging/local.conf"
 
 HOST = '127.0.0.1'
