@@ -1,5 +1,6 @@
 ## Collaborators
 
+
 Project Owner - [Dhansree Suraj](https://github.com/dhansreeS)
 
 QA partner - [Arpan Venugopal](https://github.com/spartan07)
@@ -91,6 +92,7 @@ from os import path
 PROJECT_HOME = path.dirname(path.abspath(__file__))
 DEBUG = True
 LOGGING_CONFIG = path.join(PROJECT_HOME, 'config/logging/local.conf')
+
 CONFIG_FILE = path.join(PROJECT_HOME, 'config/config.yml')
 FLASK_CONFIG = path.join(PROJECT_HOME, 'config/flask_config.py')
 ```
@@ -111,6 +113,8 @@ export MYSQL_PORT=<port>
 After creating this file, please run the following to create the environment variables:
 
 `echo source vi ~/.mysqlconfig >> ~/.bash_profile`
+
+If setting an environment variable is not possible, you can update the `config.yml` file and then enter your user name and password through the command line.
 
 Specific to the app, you will have to update the port in the `flask_config.py` file as well as the flags for whether you want to use RDS or Sqlite to store the user input and whether you're pulling the model artifacts from S3 or from your locally saved files.
 
@@ -166,6 +170,7 @@ If you don't provide a username and password, the details will be acquired from 
 
 ### 4. Run all processes
 
+
 Before you run the app, please follow the steps below to ensure you have all the artifacts.
 
 Data Acquisition is the first step in the process. You can either load the data to your local or copy it to your s3 bucket. 
@@ -193,3 +198,4 @@ Finally, we can run the app. Currently, all configurations are to run the app lo
 If you haven't created the artifacts, please `conda activate boss` and run.
 
 ```make app```
+
