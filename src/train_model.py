@@ -118,7 +118,7 @@ def split_data(X, y, configs, s3=False, bucket=None):
     """
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, train_size=configs['train_size'], random_state=configs['random_state']
+        X, y, train_size=configs['train_size'], test_size = 1-configs['train_size'], random_state=configs['random_state']
     )
 
     os.makedirs(configs['TEST_PATH'], exist_ok=True)
