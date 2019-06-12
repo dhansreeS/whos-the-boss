@@ -1,10 +1,8 @@
 import logging.config
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 import os
-import yaml
-import config
 import sys
 
 
@@ -20,11 +18,12 @@ class UserLines(Base):
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
     user_text = Column(String(300), unique=False, nullable=False)
-    time = Column(String(100), unique=False, nullable=False)
+    predicted = Column(String(30), unique=False, nullable=False)
+    time = Column(DateTime, unique=False, nullable=False)
 
     def __repr__(self):
-        userlines_repr = "<UserLines(id='%i', user_text='%s', time='%s')>"
-        return userlines_repr % (self.id, self.user_text, self.time)
+        userlines_repr = "<UserLines(id='%i', user_text='%s', predicted='%s', time='%s')>"
+        return userlines_repr % (self.id, self.user_text, self.predicted, self.time)
 
 
 def create_sqlite_db(args):
@@ -62,12 +61,7 @@ def create_rds_db(args):
             None
     """
 
-    try:
-        with open(config.AWS_CONFIG, 'r') as f:
-            aws_config = yaml.load(f)
-    except FileNotFoundError:
-        logger.error('AWS config YAML File not Found')
-        sys.exit(1)
+    aws_config = args.rdsConfig
 
     conn_type = aws_config['CONN_TYPE']
     host = aws_config['HOST_NAME']

@@ -1,5 +1,8 @@
 import pandas as pd
-import numpy as np
+from os import path
+import sys
+rel_path = path.dirname(path.dirname(path.abspath(__file__)))
+sys.path.append(rel_path)
 import src.clean_data as cd
 
 
@@ -73,6 +76,24 @@ def test_remove_stop_words():
                 'still medal', 'done']
 
     created_df = cd.remove_stop_words(input_df['line_text'])
+
+    # Check expected output
+    assert all([a == b for a, b in zip(created_df, expected)])
+
+
+def test_get_lemmatized_text():
+
+    # input dataframe
+    inputs = {
+        'line_text': ['rocks', 'corpora', 'better']
+    }
+
+    input_df = pd.DataFrame(data=inputs)
+
+    # Expected data frame
+    expected = ['rock', 'corpus', 'better']
+
+    created_df = cd.get_lemmatized_text(input_df['line_text'])
     print(created_df)
 
     # Check expected output

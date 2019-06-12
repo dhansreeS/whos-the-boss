@@ -1,0 +1,61 @@
+s3:
+  PUBLIC_S3: nw-dhansreesuraj-s3
+  FILE_NAME: the_office_lines.csv
+  DEST_S3_BUCKET: bucket-boss
+  DEST_FILE_NAME: raw/the_office_lines.csv
+rds:
+  HOST_NAME: mysql-nw-dhansreesuraj.cfjz8jklwgcf.us-east-2.rds.amazonaws.com
+  PORT_NO: 3306
+  DATABASE_NAME: msia423
+  CONN_TYPE: mysql+pymysql
+sqldb:
+  DB_PATH: data/msia423.db
+first_load:
+  PATH: ./data/raw
+  FILE_NAME: the_office_lines.csv
+processed:
+  SOURCE_PATH: ./data/raw/the_office_lines.csv
+  DEST_PATH: ./data/processed
+  FILE_NAME: processed_lines.csv
+  FILE_NAME_S3: processed/processed_lines.csv
+train:
+  SOURCE_PATH: ./data/processed/processed_lines.csv
+  S3_SOURCE: processed/processed_lines.csv
+  TFIDF_PATH: ./models
+  TFIDF_NAME: tfidf_vectorizer.pkl
+  S3_TFIDF: models/tfidf_vectorizer.pkl
+  split:
+    random_state: 12345
+    train_size: 0.8
+    TEST_PATH: ./data/test
+    X_TEST_NAME: X_test.npz
+    Y_TEST_NAME: y_test.npy
+    S3_X_TEST_NAME: test/X_test.npz
+    S3_Y_TEST_NAME: test/y_test.npy
+  model:
+    C: 0.8
+    MODEL_SAVE: ./models/model.pkl
+    S3_MODEL_SAVE: models/model.pkl
+evaluate:
+  load:
+    DATA_PATH: ./data/test
+    X_TEST_NAME: X_test.npz
+    Y_TEST_NAME: y_test.npy
+    S3_X_TEST_NAME: test/X_test.npz
+    S3_Y_TEST_NAME: test/y_test.npy
+  predict:
+    MODEL_PATH: ./models/model.pkl
+    S3_MODEL_PATH: models/model.pkl
+  metrics:
+    METRIC_PATH: ./models/
+    METRIC_NAME: metrics.txt
+    CONFUSION_NAME: confusion.csv
+    S3_METRIC_NAME: models/metrics.txt
+    S3_CONFUSION_NAME: models/confusion.csv
+serve:
+  S3_MODEL: models/model.pkl
+  S3_TFIDF: models/tfidf_vectorizer.pkl
+  DEST_S3_BUCKET: bucket-boss
+  MODEL_PATH: ./models/model.pkl
+  TFIDF_PATH: ./models/tfidf_vectorizer.pkl
+
