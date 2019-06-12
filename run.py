@@ -27,7 +27,6 @@ from src.load_data import load_data
 from src.data_model import create_sqlite_db, create_rds_db
 from src.train_model import train
 from src.evaluate_model import evaluate
-from app.app import start_app
 from config import PROJECT_HOME
 
 
@@ -89,6 +88,7 @@ if __name__ == '__main__':
     sub_process.add_argument('--s3config', default=config['s3'], help='s3 configurations')
     sub_process.set_defaults(func=evaluate)
 
+    from app.app import start_app
     sub_process = subparsers.add_parser('app')
     sub_process.set_defaults(func=start_app)
 
