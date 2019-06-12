@@ -1,3 +1,9 @@
+## Collaborators
+
+Project Owner - [Dhansree Suraj](https://github.com/dhansreeS)
+
+QA partner - [Arpan Venugopal](https://github.com/spartan07)
+
 # Who's the boss?
 
 <!-- toc -->
@@ -9,6 +15,7 @@
   * [2. Update configurations](#2-update-configurations)
   * [3. Initialize the database](#3-initialize-the-database)
   * [4. Run certain processes](#4-run-certain-processes)
+  * [5. Run the app](#5-run-the-app)
 
 <!-- tocstop -->
 
@@ -151,23 +158,32 @@ If you choose to create a table in an existing RDS database, run the following c
 
 If you don't provide a username and password, the details will be acquired from the environment variables that were set before.
 
-### 4. Run all processed
+### 4. Run all processes
 
 Before you run the app, please follow the steps below to ensure you have all the artifacts.
 
-Data Aquisition is the first step in the process. You can either load the data to your local or copy it to your s3 bucket. 
+Data Acquisition is the first step in the process. You can either load the data to your local or copy it to your s3 bucket. 
 
 ```python3 run.py load --localConf=<local data configurations from yaml> --s3=<True or False> --s3config=<s3 configurations from yaml>```
 
+Next is the data cleaning step. Again, you can either load or save it to S3 or locally.
 
-Loading the data in your S3 bucket:
+```python3 run.py process --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>```
 
-```python3 run.py loadS3 --bucket=<name of bucket>```
+The third step is to train the model. 
 
-Pre-processing data and saving it to your local system or to an S3 bucket:
+```python3 run.py train --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>```
 
-```python3 run.py process --path=<name of path> --s3=<True or False> --bucket_name=<name of bucket>```
+The last step is to evaluate the model. We store the calculated accuracy metrics to an S3 bucket or locally.
 
-## Collaborators
+```python3 run.py evaluate --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>```
 
-QA partner - [Arpan Venugopal](https://github.com/spartan07)
+### 5. Run the app
+
+Finally, we can run the app. Currently, all configurations are to run the app locally. If you've created all the artifacts in the previous step, you can run
+
+```python3 run.py app```
+
+If you haven't created the artifacts, please `conda activate boss` and run.
+
+```make app```

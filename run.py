@@ -11,6 +11,7 @@ python3 run.py createSqlite --engine_string=<Database URI for sqlite db>
 python3 run.py createRDS --rdsConfig=<RDS configurations> --username=<Username for RDS> --password=<Password for RDS>
 python3 run.py train --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>
 python3 run.py evaluate --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>
+python3 run.py app
 """
 import argparse
 import logging.config
