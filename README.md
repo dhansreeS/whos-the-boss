@@ -189,6 +189,8 @@ The last step is to evaluate the model. We store the calculated accuracy metrics
 
 ```python3 run.py evaluate --localConf=<local data configurations> --s3=<True or False> --s3config=<s3 configurations>```
 
+Check test folder on instructions to run unit tests on functions.
+
 ### 5. Run the app
 
 Finally, we can run the app. Currently, all configurations are to run the app locally. If you've created all the artifacts in the previous step, you can run
