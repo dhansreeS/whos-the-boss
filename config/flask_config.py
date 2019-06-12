@@ -7,9 +7,9 @@ HOST = '127.0.0.1'
 PORT = 9033
 APP_NAME = 'whos-the-boss'
 
-USE_S3 = True
+USE_S3 = False
 
-USE_RDS = True
+USE_RDS = False
 DB_PATH = path.join(PROJECT_HOME, 'data/msia423.db')
 SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(DB_PATH)
 SQLALCHEMY_TRACK_MODIFICATIONS = True
