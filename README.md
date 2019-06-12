@@ -141,6 +141,12 @@ DEST_S3_BUCKET = 'bucket-boss'
 ```
 Additionally, you can update the paths for the model artifacts and the SQL Alchemy Database URI. 
 
+Note: Please ensure you have the following packages downloaded. Open a python shell and run the following commands.
+```python
+nltk.download('stopwords')
+nltk.download('wordnet')
+```
+
 ### 3. Initialize the database
 
 You may initialize an sqlite database or create an table in an existing RDS database. 
