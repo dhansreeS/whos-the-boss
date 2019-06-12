@@ -77,22 +77,23 @@ conda activate boss
 
 ### 2. Update configurations 
 
-Most configuration updates can be made in the `config.py` file. It includes the following configurations
+Most configuration updates can be made in the `config.yml` file in the config folder. The path to this is configured in the `config.py` file. It includes the following configurations
 
 ```python
+from os import path
+PROJECT_HOME = path.dirname(path.abspath(__file__))
 DEBUG = True
-LOGGING_CONFIG = "config/logging/local.conf"
-PORT = 9033
-APP_NAME = "whos-the-boss"
-SQLALCHEMY_DATABASE_URI = 'sqlite:///data/msia423.db'
-SQLALCHEMY_TRACK_MODIFICATIONS = True
-DATABASE_NAME = 'msia423'
-HOST = "127.0.0.1"
-BUCKET_NAME = 'bucket-boss'
+LOGGING_CONFIG = path.join(PROJECT_HOME, 'config/logging/local.conf')
+CONFIG_FILE = path.join(PROJECT_HOME, 'config/config.yml')
+FLASK_CONFIG = path.join(PROJECT_HOME, 'config/flask_config.py')
 ```
-Please update the database name, bucket name (S3 bucket to be copied to) and the SQLAlchemy URI. 
+If you have a different config.yml file, please update the path in the file above. The `config.yml` file has all the paths to save the different artifacts at each point of the pipeline. These can be updated as required. 
 
-If data needs to be pushed to RDS please create a .mysqlconfig files as follows:
+A few necessary updates that need to be made are the S3 configurations and the RDS configurations, if you plan to save data on AWS. To be able to interact with AWS, you must ensure your aws is configured by running the `aws configure` command. 
+
+Once you have AWS configured, you can update the S3 configurations and RDS configurations. These updates will be made in the `config.yml` file and the `flask_config.py` file in the config folder. The `flask_config.py` file is for running the app specifically. 
+
+In addition to the RDS configurations in the config files, please create a .mysqlconfig files as follows:
 
 ```bash
 export MYSQL_USER=<username>
@@ -104,7 +105,34 @@ After creating this file, please run the following to create the environment var
 
 `echo source vi ~/.mysqlconfig >> ~/.bash_profile`
 
-Please ensure you have run `aws configure` before trying to access any of the s3 buckets or RDS instance.
+Specific to the app, you will have to update the port in the `flask_config.py` file as well as the flags for whether you want to use RDS or Sqlite to store the user input and whether you're pulling the model artifacts from S3 or from your locally saved files.
+
+```python
+from os import path
+from config import PROJECT_HOME
+HOST = '127.0.0.1'
+PORT = 9033
+APP_NAME = 'whos-the-boss'
+
+USE_S3 = True
+
+USE_RDS = True
+DB_PATH = path.join(PROJECT_HOME, 'data/msia423.db')
+SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(DB_PATH)
+SQLALCHEMY_TRACK_MODIFICATIONS = True
+SQLALCHEMY_ECHO = False  # If true, SQL for queries made will be printed
+
+# Paths
+TFIDF_PATH = path.join(PROJECT_HOME, 'models/tfidf_vectorizer.pkl')
+MODEL_PATH = path.join(PROJECT_HOME, 'models/model.pkl')
+
+# S3 model, bucket, tfidf_vectorizer
+S3_MODEL = 'models/model.pkl'
+S3_TFIDF = 'models/tfidf_vectorizer.pkl'
+DEST_S3_BUCKET = 'bucket-boss'
+
+```
+Additionally, you can update the paths for the model artifacts and the SQL Alchemy Database URI. 
 
 ### 3. Initialize the database
 
@@ -113,19 +141,24 @@ The table that is created is specifically to capture user inputs.
 
 If you choose to use sqlite, run the following command:
 
-```python3 run.py createSqlite --engine_string=<engine_string for connection>```
+```python3 run.py createSqlite --engine_string=<Database URI for sqlite db>```
 
-If you don't provide an engine_string, the default engine_string from the `config.py` file will be used.
+If you don't provide an engine_string, the default engine_string from the `config.yml` file will be used.
 
 If you choose to create a table in an existing RDS database, run the following command: 
 
-```python3 run.py createRDS --database=<Database in RDS>```
+```python3 run.py createRDS --rdsConfig=<RDS configurations dictionary from yaml> --username=<Username for RDS> --password=<Password for RDS>```
 
-If you don't provide a database name, the default database name from the `config.py` file will be used.
+If you don't provide a username and password, the details will be acquired from the environment variables that were set before.
 
-### 4. Run certain processes
+### 4. Run all processed
 
-In addition to the database initialization, you can perform two only actions.
+Before you run the app, please follow the steps below to ensure you have all the artifacts.
+
+Data Aquisition is the first step in the process. You can either load the data to your local or copy it to your s3 bucket. 
+
+```python3 run.py load --localConf=<local data configurations from yaml> --s3=<True or False> --s3config=<s3 configurations from yaml>```
+
 
 Loading the data in your S3 bucket:
 
